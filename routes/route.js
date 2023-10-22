@@ -30,6 +30,7 @@ async function authSheets() {
   
   router.get("/getdata", async (req, res) => {
     const { sheets } = await authSheets();
+    let company_name=req.query.company_name;
     let data={
         "gpt":{
             "company":{},
@@ -37,11 +38,22 @@ async function authSheets() {
         }
    
     };
-  
+   let company_available=false;
+    if ((await sheets.spreadsheets.get({ spreadsheetId: process.env.DATABASE_ID })).data.sheets
+      .map(sheet => {
+        if( sheet.properties.title == company_name)
+        {
+           company_available=true
+        }
+       
+      })) {
+    }
+    if(company_available)
+    {
     // Read rows from spreadsheet
     const getRows = await sheets.spreadsheets.values.get({
       spreadsheetId:  process.env.DATABASE_ID,
-      range: "Sheet1",
+      range: company_name,
     });
 
     let competitors=[];
@@ -96,16 +108,37 @@ async function authSheets() {
 
     data.competitors=competitors;
     res.send(data);
+
+  }
+  else
+  {
+    res.send("Company Data not available");
+  }
   });
   
 
   router.post("/updatedata", async (req, res) => {
 
+    const { sheets } = await authSheets();
     let updateddata=[];
     let data=req.body.gpt;
     let companydata=data.company;
     let competitors=data.competitors;
-    let temp=[];
+    
+
+    if ((await sheets.spreadsheets.get({spreadsheetId: process.env.DATABASE_ID})).data.sheets
+    .filter(sheet => sheet.properties.title == companydata.company_name).length == 0) {
+     sheets.spreadsheets.batchUpdate ({ 
+      spreadsheetId: process.env.DATABASE_ID, 
+      resource: {requests: [ {addSheet: {properties: {title: companydata.company_name }}}]}});
+      
+      
+  }
+  
+   let temp=["Company","Competitor","Products And Services","Industries Served","Top Clients","Market Positioning","SWOT Analysis"];
+    updateddata.push(temp);
+
+    temp=[];
     temp.push(companydata.company_name)
     temp.push(0);
     temp.push(JSON.stringify(companydata.Products_And_Services));
@@ -125,18 +158,20 @@ async function authSheets() {
          temp.push(JSON.stringify(val.SWOT_Analysis));
         updateddata.push(temp);
     });
-    const { sheets } = await authSheets();
+   
 
-    await sheets.spreadsheets.values.update({
-        spreadsheetId:  process.env.DATABASE_ID,
-        range: "Sheet1!A2:G5",
-        valueInputOption: "USER_ENTERED",
-        resource: {
-          values: updateddata,
-        },
-      });
+    sheets.spreadsheets.values.update({
+      spreadsheetId: process.env.DATABASE_ID,
+      range: `${companydata.company_name}`,
+      valueInputOption: "USER_ENTERED",
+      resource: {
+        values: updateddata,
+      },
+    });
 
       res.send("Spreadsheet updated successfully");
+
+  
 
   })
   
