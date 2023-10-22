@@ -54,8 +54,8 @@ async function authSheets() {
             data.company={
                 "company_name":element[0],
                     "Products_And_Services":element[2]!=undefined?JSON.parse(element[2]):{},
-                    "Industries_Served":element[3]!=undefined?[JSON.parse(element[3])]:[],
-                    "Top_Clients":element[4]!=undefined?[JSON.parse(element[4])]:[],
+                    "Industries_Served":element[3]!=undefined?JSON.parse(element[3]):[],
+                    "Top_Clients":element[4]!=undefined?JSON.parse(element[4]):[],
                     "Market_Positioning":element[5]!=undefined?
                         JSON.parse(element[5])
                     :{
@@ -74,8 +74,8 @@ async function authSheets() {
                 {
                     "company_name":element[0],
                     "Products_And_Services":element[2]!=undefined?JSON.parse(element[2]):{},
-                    "Industries_Served":element[3]!=undefined?[JSON.parse(element[3])]:[],
-                    "Top_Clients":element[4]!=undefined?[JSON.parse(element[4])]:[],
+                    "Industries_Served":element[3]!=undefined?JSON.parse(element[3]):[],
+                    "Top_Clients":element[4]!=undefined?JSON.parse(element[4]):[],
                     "Market_Positioning":element[5]!=undefined?
                         JSON.parse(element[5])
                     :{
